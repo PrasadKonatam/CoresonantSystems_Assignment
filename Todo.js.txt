@@ -1,0 +1,87 @@
+import React, { useState, useEffect } from "react";
+
+function Todo() {
+  const [todos, setTodos] = useState([]);
+  const [newTodo, setNewTodo] = useState("");
+  const [showCompleted, setShowCompleted] = useState(false);
+
+  useEffect(() => {
+    // Fetch todos from the API endpoint
+    fetch("https://jsonplaceholder.typicode.com/users/1/todos")
+      .then((response) => response.json())
+      .then((data) => setTodos(data));
+  }, []);
+
+  const addTodo = () => {
+    if (newTodo.trim() !== "") {
+      setTodos([
+        ...todos,
+        {
+          id: todos.length + 1,
+          title: newTodo,
+          completed: false,
+        },
+      ]);
+      setNewTodo("");
+    }
+  };
+
+  const editTodo = (id, updatedTitle) => {
+    const updatedTodos = todos.map((todo) =>
+      todo.id === id ? { ...todo, title: updatedTitle } : todo
+    );
+    setTodos(updatedTodos);
+  };
+
+  const deleteTodo = (id) => {
+    const updatedTodos = todos.filter((todo) => todo.id !== id);
+    setTodos(updatedTodos);
+  };
+
+  const toggleCompleted = (id) => {
+    const updatedTodos = todos.map((todo) =>
+      todo.id === id ? { ...todo, completed: !todo.completed } : todo
+    );
+    setTodos(updatedTodos);
+  };
+
+  return (
+    <div>
+      <input
+        type="text"
+        placeholder="Add a new task"
+        value={newTodo}
+        onChange={(e) => setNewTodo(e.target.value)}
+      />
+      <button onClick={addTodo}>Add</button>
+
+      <div>
+        <label>Show Completed Tasks:</label>
+        <input
+          type="checkbox"
+          checked={showCompleted}
+          onChange={() => setShowCompleted(!showCompleted)}
+        />
+      </div>
+
+      <ul>
+        {todos.map((todo) => (
+          <li key={todo.id}>
+            <input
+              type="checkbox"
+              checked={todo.completed}
+              onChange={() => toggleCompleted(todo.id)}
+            />
+            <span style={{ textDecoration: todo.completed ? "line-through" : "none" }}>
+              {todo.title}
+            </span>
+            <button onClick={() => editTodo(todo.id, prompt("Edit task:", todo.title))}>Edit</button>
+            <button onClick={() => deleteTodo(todo.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export default Todo;
